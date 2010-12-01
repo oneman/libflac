@@ -2151,7 +2151,11 @@ void set_defaults_(FLAC__StreamEncoder *encoder)
 	encoder->protected_->num_metadata_blocks = 0;
 
 	encoder->private_->seek_table = 0;
-	encoder->private_->disable_constant_subframes = false;
+	/* constant subframes must be disabled for streaming oggflac 
+	 * most clients will pause decoding until the time of 
+	 * silence is over, or otherwise misbehave or crash -David Richards
+	 */
+	encoder->private_->disable_constant_subframes = true;
 	encoder->private_->disable_fixed_subframes = false;
 	encoder->private_->disable_verbatim_subframes = false;
 #if FLAC__HAS_OGG

@@ -201,11 +201,24 @@ FLAC__StreamEncoderWriteStatus FLAC__ogg_encoder_aspect_write_callback_wrapper(F
 			}
 		}
 		else {
-			while(ogg_stream_pageout(&aspect->stream_state, &aspect->page) != 0) {
-				if(write_callback(encoder, aspect->page.header, aspect->page.header_len, 0, current_frame, client_data) != FLAC__STREAM_ENCODER_WRITE_STATUS_OK)
-					return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
-				if(write_callback(encoder, aspect->page.body, aspect->page.body_len, 0, current_frame, client_data) != FLAC__STREAM_ENCODER_WRITE_STATUS_OK)
-					return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+			/* Most clients existing on December 1st 2010 can not handle more than 1 packet per page
+			 * Silent packets are about 613 bytes  -David Richards 
+			 */
+			if (bytes < 700) {
+				while(ogg_stream_flush(&aspect->stream_state, &aspect->page) != 0) {
+					if(write_callback(encoder, aspect->page.header, aspect->page.header_len, 0, current_frame, client_data) != FLAC__STREAM_ENCODER_WRITE_STATUS_OK)
+						return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+					if(write_callback(encoder, aspect->page.body, aspect->page.body_len, 0, current_frame, client_data) != FLAC__STREAM_ENCODER_WRITE_STATUS_OK)
+						return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+				}
+			}
+			else { 
+				while(ogg_stream_pageout(&aspect->stream_state, &aspect->page) != 0) {
+					if(write_callback(encoder, aspect->page.header, aspect->page.header_len, 0, current_frame, client_data) != FLAC__STREAM_ENCODER_WRITE_STATUS_OK)
+						return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+					if(write_callback(encoder, aspect->page.body, aspect->page.body_len, 0, current_frame, client_data) != FLAC__STREAM_ENCODER_WRITE_STATUS_OK)
+						return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+				}
 			}
 		}
 	}
