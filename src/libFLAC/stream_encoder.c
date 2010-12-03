@@ -2156,7 +2156,8 @@ void set_defaults_(FLAC__StreamEncoder *encoder)
 	 * silence is over, or otherwise misbehave or crash -David Richards
 	 */
 	encoder->private_->disable_constant_subframes = true;
-	encoder->private_->disable_fixed_subframes = false;
+	/* hell disable fixed subframes too */
+	encoder->private_->disable_fixed_subframes = true;
 	encoder->private_->disable_verbatim_subframes = false;
 #if FLAC__HAS_OGG
 	encoder->private_->is_ogg = false;
